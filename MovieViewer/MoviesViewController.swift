@@ -8,6 +8,8 @@
 
 import UIKit
 import AFNetworking
+import JTProgressHUD
+
 
 class MoviesViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
 
@@ -44,11 +46,23 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
                             NSLog("response: \(responseDictionary)")
                             self.movies = responseDictionary["results"] as? [NSDictionary]
                             self.tableView.reloadData()
+                            self.delay(1, closure: {
+                                JTProgressHUD.hide()
+                            })
+                            
                     }
+                } else {
+                    self.delay(1, closure: {
+                        JTProgressHUD.hide()
+                    })
                 }
         });
         task.resume()
         // Do any additional setup after loading the view.
+    }
+    
+    override func viewDidAppear(animated: Bool) {
+        JTProgressHUD.showWithStyle(.Gradient)
     }
 
     override func didReceiveMemoryWarning() {
