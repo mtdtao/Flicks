@@ -14,22 +14,30 @@ class CollectionMovieViewController: UIViewController, UISearchBarDelegate {
 
     var movies: [NSDictionary]?
     var filteredMovies: [NSDictionary]?
+    var imgDict = [NSDictionary: UIImage]()
+
     
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var netWorkErrorView: UIView!
     
     var refreshControl: UIRefreshControl!
+    var dismissKeyboardTap = UITapGestureRecognizer()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.view.backgroundColor = UIColor.blackColor()
+        let backButton = UIBarButtonItem()
+        backButton.title = ""
+        navigationItem.backBarButtonItem = backButton
+        
+        searchBar.delegate = self
         collectionView.dataSource = self
         collectionView.delegate = self
-        searchBar.delegate = self
+        
         netWorkErrorView.hidden = true
         
-        let tap = UITapGestureRecognizer(target: self, action: "dismissKeyboard")
-        self.view.addGestureRecognizer(tap)
         
         let tapNetworkError = UITapGestureRecognizer(target: self, action: "networkErrorTap")
         netWorkErrorView.addGestureRecognizer(tapNetworkError)
@@ -37,16 +45,21 @@ class CollectionMovieViewController: UIViewController, UISearchBarDelegate {
         refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: "onRefresh", forControlEvents: UIControlEvents.ValueChanged)
         collectionView.insertSubview(refreshControl, atIndex: 0)
-        
 
         
-        connectMovie()
+        connectMovieWithLoading()
         
         // Do any additional setup after loading the view.
     }
     
-    override func viewDidAppear(animated: Bool) {
-        JTProgressHUD.showWithStyle(.Gradient)
+    override func viewWillAppear(animated: Bool) {
+        self.navigationController?.navigationBarHidden = true
+
+    }
+    
+    override func viewWillDisappear(animated: Bool) {
+        self.navigationController?.navigationBarHidden = false
+
     }
 
     override func didReceiveMemoryWarning() {
@@ -65,12 +78,18 @@ class CollectionMovieViewController: UIViewController, UISearchBarDelegate {
                     filteredMovies?.append(movie)
                 }
             }
-           
         }
-        
         
         collectionView.reloadData()
     }
+    
+    func searchBarShouldBeginEditing(searchBar: UISearchBar) -> Bool {
+        dismissKeyboardTap = UITapGestureRecognizer(target: self, action: "dismissKeyboard")
+        self.view.addGestureRecognizer(dismissKeyboardTap)
+        return true
+    }
+    
+
     
     func networkErrorTap() {
         JTProgressHUD.showWithStyle(.Gradient)
@@ -82,6 +101,7 @@ class CollectionMovieViewController: UIViewController, UISearchBarDelegate {
     
     func dismissKeyboard() {
         self.searchBar.resignFirstResponder()
+        self.view.removeGestureRecognizer(dismissKeyboardTap)
     }
     
     func delay(delay:Double, closure:()->()) {
@@ -102,6 +122,8 @@ class CollectionMovieViewController: UIViewController, UISearchBarDelegate {
     
     
     func connectMovie() {
+        
+
         let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
         let url = NSURL(string:"https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")
         let request = NSURLRequest(URL: url!)
@@ -116,7 +138,7 @@ class CollectionMovieViewController: UIViewController, UISearchBarDelegate {
                 if let data = dataOrNil {
                     if let responseDictionary = try! NSJSONSerialization.JSONObjectWithData(
                         data, options:[]) as? NSDictionary {
-                            //NSLog("response: \(responseDictionary)")
+                            NSLog("response: \(responseDictionary)")
                             self.movies = responseDictionary["results"] as? [NSDictionary]
                             self.refreshControl.endRefreshing()
                             self.netWorkErrorView.hidden = true
@@ -127,17 +149,23 @@ class CollectionMovieViewController: UIViewController, UISearchBarDelegate {
                     print("network good")
                 } else {
                     self.netWorkErrorView.hidden = false
-                    JTProgressHUD.hide()
                     print("network error1")
 
                 }
                 if error != nil {
                     self.netWorkErrorView.hidden = false
-                    JTProgressHUD.hide()
                     print("network error2")
                 }
         });
         task.resume()
+    }
+    
+    func connectMovieWithLoading(){
+        JTProgressHUD.showWithStyle(.Gradient)
+        connectMovie()
+        self.delay(2, closure: {
+            JTProgressHUD.hide()
+        })
     }
 
     /*
@@ -172,16 +200,13 @@ extension CollectionMovieViewController: UICollectionViewDataSource, UICollectio
                 let imageUrl = NSURL(string: baseUrl + posterPath)
                 cell.moviePoster.alpha = 0
                 cell.moviePoster.setImageWithURL(imageUrl!)
+                print(cell.moviePoster.image)
                 UIView.animateWithDuration(1, delay: 0, options: .CurveEaseInOut, animations: { () -> Void in
                     cell.moviePoster.alpha = 1
                     }, completion: nil)
-                
-                let tap = UITapGestureRecognizer(target: self, action: "goToDetail")
-                cell.moviePoster.addGestureRecognizer(tap)
             } else {
                 print("null pic")
                 print(movie["title"])
-                //cell.moviePoster.backgroundColor = UIColor.redColor()
                 cell.moviePoster.image = UIImage(named: "template")
             }
         }
@@ -189,14 +214,37 @@ extension CollectionMovieViewController: UICollectionViewDataSource, UICollectio
         return cell
     }
     
-    func goToDetail() {
-        self.performSegueWithIdentifier("goToDetail", sender: self)
-    }
-    
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-        print("!!!!!pressed !!!!!!===")
-        self.performSegueWithIdentifier("goToDetail", sender: self)
+//        var detailView = segue.destinationViewController as! MovieDetailViewController
+        
     }
     
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if segue.identifier == "goToDetail" {
+            print("segue to detailview")
+            let cell = sender as! MovieCollectionViewCell
+            let index = self.collectionView.indexPathForCell(cell)
+            var detailView = segue.destinationViewController as! MovieDetailViewController
+            detailView.posterImg = cell.moviePoster.image
+            if let title = filteredMovies![index!.row]["title"] as? String {
+                detailView.title = title
+            }
+            if let overview = filteredMovies![index!.row]["overview"] as? String {
+                detailView.overview = overview
+            }
+            if let voteAvg = filteredMovies![index!.row]["vote_average"] as? NSNumber {
+                detailView.score = String(format: "%.1f", Double(voteAvg))
+            }
+            if let voteCnt = filteredMovies![index!.row]["vote_count"] as? NSNumber {
+                detailView.votePoepleCount = "Voted by \(voteCnt) people"
+            }
+            if let releaseDate = filteredMovies![index!.row]["release_date"] as? String {
+                detailView.releaseDate = "Release date: \(releaseDate)"
+            }
+
+            
+
+        }
+    }
 }
 
