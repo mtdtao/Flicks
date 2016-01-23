@@ -198,12 +198,22 @@ extension CollectionMovieViewController: UICollectionViewDataSource, UICollectio
                 
                 let baseUrl = "http://image.tmdb.org/t/p/w500"
                 let imageUrl = NSURL(string: baseUrl + posterPath)
-                cell.moviePoster.alpha = 0
-                cell.moviePoster.setImageWithURL(imageUrl!)
-                print(cell.moviePoster.image)
-                UIView.animateWithDuration(1, delay: 0, options: .CurveEaseInOut, animations: { () -> Void in
-                    cell.moviePoster.alpha = 1
-                    }, completion: nil)
+                let imageRequest = NSURLRequest(URL: imageUrl!)
+                cell.moviePoster.setImageWithURLRequest(imageRequest, placeholderImage: nil, success: { (imageRequest, imageResponse, image) -> Void in
+                    if imageResponse != nil {
+                        print("Image was NOT cached, fade in image")
+                        cell.moviePoster.alpha = 0.0
+                        cell.moviePoster.image = image
+                        UIView.animateWithDuration(0.3, animations: { () -> Void in
+                            cell.moviePoster.alpha = 1.0
+                        })
+                    } else {
+                        print("Image was cached so just update the image")
+                        cell.moviePoster.image = image
+                    }
+                    }, failure: { (imageRequest, imageResponse, error) -> Void in
+                        print("picture load fail")
+                })
             } else {
                 print("null pic")
                 print(movie["title"])
@@ -214,10 +224,6 @@ extension CollectionMovieViewController: UICollectionViewDataSource, UICollectio
         return cell
     }
     
-    func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-//        var detailView = segue.destinationViewController as! MovieDetailViewController
-        
-    }
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if segue.identifier == "goToDetail" {
@@ -230,7 +236,7 @@ extension CollectionMovieViewController: UICollectionViewDataSource, UICollectio
                 detailView.title = title
             }
             if let overview = filteredMovies![index!.row]["overview"] as? String {
-                detailView.overview = overview
+                detailView.overview = "Overview: \(overview)"
             }
             if let voteAvg = filteredMovies![index!.row]["vote_average"] as? NSNumber {
                 detailView.score = String(format: "%.1f", Double(voteAvg))

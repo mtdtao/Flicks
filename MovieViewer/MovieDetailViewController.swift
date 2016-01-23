@@ -13,9 +13,7 @@ class MovieDetailViewController: UIViewController {
     @IBOutlet weak var posterImage: UIImageView!
     
     @IBOutlet weak var movieOverview: UITextView!
-    
-    @IBOutlet weak var testtext: UILabel!
-    
+        
     @IBOutlet weak var scoreLabel: UILabel!
     
     @IBOutlet weak var votePeopleNumber: UILabel!
