@@ -18,6 +18,7 @@
 		F78DD7131C472ACE0048F452 /* MovieCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F78DD7121C472ACE0048F452 /* MovieCollectionViewCell.swift */; };
 		F78DD7151C4AC5A90048F452 /* MovieDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F78DD7141C4AC5A90048F452 /* MovieDetailViewController.swift */; };
 		F78DD7171C4AD99F0048F452 /* Artboard 9.png in Resources */ = {isa = PBXBuildFile; fileRef = F78DD7161C4AD99F0048F452 /* Artboard 9.png */; };
+		F7F4FC161C57D0E600CC2343 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7F4FC151C57D0E600CC2343 /* DetailViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +37,7 @@
 		F78DD7121C472ACE0048F452 /* MovieCollectionViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieCollectionViewCell.swift; sourceTree = "<group>"; };
 		F78DD7141C4AC5A90048F452 /* MovieDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MovieDetailViewController.swift; sourceTree = "<group>"; };
 		F78DD7161C4AD99F0048F452 /* Artboard 9.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Artboard 9.png"; sourceTree = SOURCE_ROOT; };
+		F7F4FC151C57D0E600CC2343 /* DetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,6 +115,7 @@
 			isa = PBXGroup;
 			children = (
 				F78DD7081C45A3BF0048F452 /* MoviesViewController.swift */,
+				F7F4FC151C57D0E600CC2343 /* DetailViewController.swift */,
 				F78DD7101C472A110048F452 /* CollectionMovieViewController.swift */,
 				F78DD7141C4AC5A90048F452 /* MovieDetailViewController.swift */,
 			);
@@ -248,6 +251,7 @@
 				F78DD7091C45A3BF0048F452 /* MoviesViewController.swift in Sources */,
 				F78DD7151C4AC5A90048F452 /* MovieDetailViewController.swift in Sources */,
 				F78DD70C1C45AD1B0048F452 /* MovieCell.swift in Sources */,
+				F7F4FC161C57D0E600CC2343 /* DetailViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
