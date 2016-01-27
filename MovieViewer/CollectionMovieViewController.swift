@@ -8,18 +8,19 @@
 
 import UIKit
 import JTProgressHUD
-import SwiftLoader
 
 class CollectionMovieViewController: UIViewController, UISearchBarDelegate {
 
     var movies: [NSDictionary]?
     var filteredMovies: [NSDictionary]?
     var imgDict = [NSDictionary: UIImage]()
+    var endPoint: String!
 
     
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var netWorkErrorView: UIView!
+    @IBOutlet weak var flowLayout: UICollectionViewFlowLayout!
     
     var refreshControl: UIRefreshControl!
     var dismissKeyboardTap = UITapGestureRecognizer()
@@ -31,6 +32,10 @@ class CollectionMovieViewController: UIViewController, UISearchBarDelegate {
         let backButton = UIBarButtonItem()
         backButton.title = ""
         navigationItem.backBarButtonItem = backButton
+        
+        flowLayout.minimumLineSpacing = 0
+        flowLayout.minimumInteritemSpacing = 0
+        flowLayout.sectionInset = UIEdgeInsetsMake(0, 0, 0, 0)
         
         searchBar.delegate = self
         collectionView.dataSource = self
@@ -125,7 +130,7 @@ class CollectionMovieViewController: UIViewController, UISearchBarDelegate {
         
 
         let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
-        let url = NSURL(string:"https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")
+        let url = NSURL(string:"https://api.themoviedb.org/3/movie/\(endPoint)?api_key=\(apiKey)")
         let request = NSURLRequest(URL: url!)
         let session = NSURLSession(
             configuration: NSURLSessionConfiguration.defaultSessionConfiguration(),
@@ -199,6 +204,8 @@ extension CollectionMovieViewController: UICollectionViewDataSource, UICollectio
                 let baseUrl = "http://image.tmdb.org/t/p/w500"
                 let imageUrl = NSURL(string: baseUrl + posterPath)
                 let imageRequest = NSURLRequest(URL: imageUrl!)
+                
+                
                 cell.moviePoster.setImageWithURLRequest(imageRequest, placeholderImage: nil, success: { (imageRequest, imageResponse, image) -> Void in
                     if imageResponse != nil {
                         print("Image was NOT cached, fade in image")
@@ -213,6 +220,8 @@ extension CollectionMovieViewController: UICollectionViewDataSource, UICollectio
                     }
                     }, failure: { (imageRequest, imageResponse, error) -> Void in
                         print("picture load fail")
+                        print(movie["title"])
+                        cell.moviePoster.image = UIImage(named: "template")
                 })
             } else {
                 print("null pic")
@@ -221,12 +230,25 @@ extension CollectionMovieViewController: UICollectionViewDataSource, UICollectio
             }
         }
         
+        
+        let backgroundView = UIView()
+        backgroundView.backgroundColor = UIColor.redColor()
+        cell.selectedBackgroundView = backgroundView
+        
+        
         return cell
     }
     
+    func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
+        let totalwidth = collectionView.bounds.size.width;
+        let numberOfCellsPerRow = 2
+        let dimensions = CGFloat(Int(totalwidth) / numberOfCellsPerRow)
+        return CGSizeMake(dimensions, dimensions/0.675)
+
+    }
     
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        if segue.identifier == "goToDetail" {
+        /*if segue.identifier == "goToDetail" {
             print("segue to detailview")
             let cell = sender as! MovieCollectionViewCell
             let index = self.collectionView.indexPathForCell(cell)
@@ -248,9 +270,17 @@ extension CollectionMovieViewController: UICollectionViewDataSource, UICollectio
                 detailView.releaseDate = "Release date: \(releaseDate)"
             }
 
-            
+        }*/
 
-        }
+        
+        
+        let cell = sender as! UICollectionViewCell
+        let indexPath = self.collectionView.indexPathForCell(cell)
+        let movie = movies![indexPath!.row]
+        
+        let detailViewController = segue.destinationViewController as! DetailViewController
+        detailViewController.movie = movie
+        
     }
 }
 

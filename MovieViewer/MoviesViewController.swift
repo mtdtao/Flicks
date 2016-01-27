@@ -18,9 +18,12 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     @IBOutlet weak var tableView: UITableView!
     
     var movies: [NSDictionary]?
+    var endPoint: String!
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        
         
         tableView.dataSource = self
         tableView.delegate = self
@@ -46,7 +49,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
     
     func connectMovie(){
         let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
-        let url = NSURL(string:"https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")
+        let url = NSURL(string:"https://api.themoviedb.org/3/movie/\(endPoint)?api_key=\(apiKey)")
         let request = NSURLRequest(URL: url!)
         let session = NSURLSession(
             configuration: NSURLSessionConfiguration.defaultSessionConfiguration(),
@@ -90,7 +93,7 @@ class MoviesViewController: UIViewController, UITableViewDataSource, UITableView
             self.refreshControl.endRefreshing()
         })
         let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
-        let url = NSURL(string:"https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")
+        let url = NSURL(string:"https://api.themoviedb.org/3/movie/\(endPoint!)?api_key=\(apiKey)")
         let request = NSURLRequest(URL: url!)
         let session = NSURLSession(
             configuration: NSURLSessionConfiguration.defaultSessionConfiguration(),
